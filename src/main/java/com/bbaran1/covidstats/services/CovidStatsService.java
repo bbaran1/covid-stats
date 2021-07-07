@@ -1,8 +1,11 @@
 package com.bbaran1.covidstats.services;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import java.io.*;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -26,7 +29,8 @@ public class CovidStatsService {
     }
 
     /**
-     * No args constructor
+     * No args constructor.
+     *
      * Creates URI from URL passed as argument.
      */
     public CovidStatsService() {
@@ -39,6 +43,7 @@ public class CovidStatsService {
      *
      * Data come from CSSEGISandData csv file available on their GitHub repository.
      * https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data
+     * @return
      */
     @PostConstruct
     public void getCovidData() {
@@ -52,9 +57,31 @@ public class CovidStatsService {
 
         try {
             HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-            System.out.println(response.body());
+            System.out.println(parseCSVData(response.body()));
         } catch (Exception e) {
-            System.out.println("Request exception occured: " + e.getMessage());
+            System.out.println("Request exception occurred: " + e.getMessage());
         }
+    }
+
+    /**
+     * Parses data which comes from response body.
+     *
+     * Data comes from csv file.
+     *
+     * @param responseBody
+     * @return parsed data
+     * @throws IOException
+     */
+    public static String parseCSVData(String responseBody) throws IOException {
+        Reader in = new StringReader(responseBody);
+        Iterable<CSVRecord> records = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(in);
+        StringBuilder output = new StringBuilder();
+        for (CSVRecord record : records) {
+            String country = record.get("Country/Region");
+            String state = record.get("Province/State");
+            state = state == "" ? "N/A" : state;
+            output.append(country + ", " + state + "\n");
+        }
+        return output.toString();
     }
 }
