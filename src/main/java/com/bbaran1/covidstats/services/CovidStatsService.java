@@ -1,5 +1,6 @@
 package com.bbaran1.covidstats.services;
 
+import com.bbaran1.covidstats.models.LocationData;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.commons.csv.CSVFormat;
@@ -13,6 +14,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @Getter
@@ -26,7 +29,7 @@ public class CovidStatsService {
      *
      * Creates URI from URL passed as argument.
      *
-     * @param dataURL
+     * @param dataURL URL to CSV file
      */
     public CovidStatsService(String dataURL) {
         this.dataURL = dataURL;
@@ -73,20 +76,38 @@ public class CovidStatsService {
      *
      * Data comes from csv file.
      *
-     * @param responseBody
+     * @param responseBody argument
      * @return parsed data
      * @throws IOException
      */
-    public static String parseCSVData(String responseBody) throws IOException {
+    public static List<LocationData> parseCSVData(String responseBody) throws IOException {
+        List<LocationData> locationsData = new ArrayList<>();
         Reader in = new StringReader(responseBody);
         Iterable<CSVRecord> records = CSVFormat.DEFAULT.withFirstRecordAsHeader().parse(in);
-        StringBuilder output = new StringBuilder();
         for (CSVRecord record : records) {
-            String country = record.get("Country/Region");
-            String state = record.get("Province/State");
-            state = state == "" ? "N/A" : state;
-            output.append(country + ", " + state + "\n");
+            try {
+                LocationData locationData = new LocationData(
+                        replaceEmptyWithNA(replaceEmptyWithNA(record.get("Country/Region"))),
+                        replaceEmptyWithNA(replaceEmptyWithNA(record.get("Province/State"))),
+                        Double.parseDouble(replaceEmptyWithNA(record.get("Lat"))),
+                        Double.parseDouble(replaceEmptyWithNA(record.get("Long"))),
+                        Integer.parseInt(replaceEmptyWithNA(record.get(record.size() - 1)))
+                );
+                locationsData.add(locationData);
+            } catch (Exception e) {
+                System.out.println("Error adding record!");
+            }
         }
-        return output.toString();
+        return locationsData;
+    }
+
+    /**
+     * Replaces empty string with "N/A"
+     *
+     * @param text text to be converted
+     * @return "N/A" or original text
+     */
+    public static String replaceEmptyWithNA(String text) {
+        return text.isEmpty() ? "N/A" : text;
     }
 }
