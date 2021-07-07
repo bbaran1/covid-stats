@@ -1,7 +1,10 @@
 package com.bbaran1.covidstats.services;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -12,6 +15,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 @Service
+@Getter
+@Setter
 public class CovidStatsService {
     private final String dataURL;
     private final URI dataURI;
@@ -39,13 +44,13 @@ public class CovidStatsService {
     }
 
     /**
-     * Gets data about covid19 situation of each available country.
+     * Gets data about Covid19 situation of each available country.
      *
      * Data come from CSSEGISandData csv file available on their GitHub repository.
      * https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data
-     * @return
      */
     @PostConstruct
+    @Scheduled(cron = "* * 1 * * *", zone = "Europe/Warsaw")
     public void getCovidData() {
 
         HttpClient httpClient = HttpClient.newHttpClient();
