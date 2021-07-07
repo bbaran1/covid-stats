@@ -7,7 +7,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class CovidStatsApplication {
 
 	public static void main(String[] args) {
+
 		SpringApplication.run(CovidStatsApplication.class, args);
+
+
 	}
 
 }
