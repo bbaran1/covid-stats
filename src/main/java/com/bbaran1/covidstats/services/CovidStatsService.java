@@ -23,6 +23,7 @@ import java.util.List;
 public class CovidStatsService {
     private final String dataURL;
     private final URI dataURI;
+    private List<LocationData> locationsData;
 
     /**
      * Constructor.
@@ -65,7 +66,8 @@ public class CovidStatsService {
 
         try {
             HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-            System.out.println(parseCSVData(response.body()));
+            locationsData = parseCSVData(response.body());
+            System.out.println(locationsData);
         } catch (Exception e) {
             System.out.println("Request exception occurred: " + e.getMessage());
         }
