@@ -9,10 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class CovidStatsApplication {
 
 	public static void main(String[] args) {
-
 		SpringApplication.run(CovidStatsApplication.class, args);
-
-
 	}
 
 }
